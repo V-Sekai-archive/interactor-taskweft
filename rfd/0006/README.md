@@ -5,7 +5,7 @@ discussion: https://github.com/V-Sekai-fire/interactor-taskweft/pull/105
 labels: domain-design, heuristics, bitter-lesson
 ---
 
-# RFD 0006: Favor generic compute-scalable search over hand-authored domain heuristics
+# RFD66606-0006: Favor generic compute-scalable search over hand-authored domain heuristics
 
 ## Context and Problem Statement
 

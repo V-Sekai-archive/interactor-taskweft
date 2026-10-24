@@ -5,7 +5,7 @@ discussion:
 labels: planner, khr-interactivity, libriscv
 ---
 
-# RFD 0004: KHR_interactivity Tier 2 — embed libriscv, compile behavior graphs to riscv64
+# RFD66606-0004: KHR_interactivity Tier 2 — embed libriscv, compile behavior graphs to riscv64
 
 ## Context and Problem Statement
 

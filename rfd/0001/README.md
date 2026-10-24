@@ -5,7 +5,7 @@ discussion: https://github.com/V-Sekai-fire/interactor-taskweft/pull/1
 labels: process
 ---
 
-# RFD 0001: Requests for Discussion
+# RFD66606-0001: Requests for Discussion
 
 ## Problem Statement
 
@@ -64,4 +64,4 @@ state current, don't leave stale rationale sitting in published RFDs).
 ## Implementation status
 
 - [x] Process defined (this RFD)
-- [x] Existing ADRs migrated to RFDs 0002-0006
+- [x] Existing ADRs migrated to RFD66606-0002-0006

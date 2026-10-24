@@ -5,7 +5,7 @@ discussion:
 labels: mcp, api
 ---
 
-# RFD 0008: MCP as the public API
+# RFD66606-0008: MCP as the public API
 
 ## Context and Problem Statement
 

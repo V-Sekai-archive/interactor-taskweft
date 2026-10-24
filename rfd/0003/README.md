@@ -5,7 +5,7 @@ discussion: https://github.com/V-Sekai-fire/interactor-taskweft/pull/83
 labels: planner, khr-interactivity
 ---
 
-# RFD 0003: KHR_interactivity Tier 1 node catalog — decompose-first and b-selector convention
+# RFD66606-0003: KHR_interactivity Tier 1 node catalog — decompose-first and b-selector convention
 
 ## Context and Problem Statement
 
