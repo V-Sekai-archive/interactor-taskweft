@@ -4,7 +4,7 @@ A general hierarchical task network planner over RECTGTN, served as plan and val
 
 ## What it is for
 
-It plans over RECTGTN, the Relationship-Enabled Capability-Temporal Goal-Task-Network model described in [docs/rectgtn.md](docs/rectgtn.md). Domains are written in an Elixir DSL or in JSON-LD. RFD 2304 in [manuals-weftspun](https://github.com/V-Sekai-fire/manuals-weftspun) owns the planner's design.
+It plans over RECTGTN, the Relationship-Enabled Capability-Temporal Goal-Task-Network model described in [docs/rectgtn.md](docs/rectgtn.md). Domains are written in an Elixir DSL or in JSON-LD. RFD66606-2304 in [manuals-weftspun](https://github.com/V-Sekai-fire/manuals-weftspun) owns the planner's design.
 
 ## Build and run
 

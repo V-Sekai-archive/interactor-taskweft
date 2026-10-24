@@ -5,7 +5,7 @@ discussion:
 labels: dsl, domain-format
 ---
 
-# RFD 0007: Elixir DSL as primary I/O format
+# RFD66606-0007: Elixir DSL as primary I/O format
 
 ## Context and Problem Statement
 

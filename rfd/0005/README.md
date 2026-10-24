@@ -5,7 +5,7 @@ discussion: https://github.com/V-Sekai-fire/interactor-taskweft/pull/96
 labels: planner, rebac, capabilities
 ---
 
-# RFD 0005: Unify domain capabilities with the ReBAC relation-expression engine
+# RFD66606-0005: Unify domain capabilities with the ReBAC relation-expression engine
 
 ## Context and Problem Statement
 

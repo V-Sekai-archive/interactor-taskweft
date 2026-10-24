@@ -5,7 +5,7 @@ discussion: https://github.com/V-Sekai-fire/interactor-taskweft/pull/68
 labels: planner, khr-interactivity
 ---
 
-# RFD 0002: Align the planner stack on the glTF Interactivity node shape
+# RFD66606-0002: Align the planner stack on the glTF Interactivity node shape
 
 ## Context and Problem Statement
 
