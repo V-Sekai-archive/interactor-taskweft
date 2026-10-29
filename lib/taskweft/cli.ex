@@ -30,7 +30,7 @@ defmodule Taskweft.CLI do
   the planner's JSON envelope. Domain + problem pairs are merged the same way
   the C++ `TwLoader::load_file_pair`
   merges them: problem `variables` override domain state by name, problem
-  `methods` / `actions` / `goal_methods` extend or override the domain, and a
+  `methods` / `actions` extend or override the domain, and a
   non-empty problem `todo_list` replaces the domain's todo list.
 
   ## Structure

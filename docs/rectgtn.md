@@ -268,7 +268,6 @@ Later documents win, so the fold order carries meaning:
 | `variables` | Merge by `name`. `init` unions its keys, and the later one wins a shared key. |
 | `actions` | Merge by key. The later one replaces. |
 | `methods` | Merge by key. The later one replaces. |
-| `goal_methods` | Merge by key. The later one replaces. |
 | `enums` | Merge by key. The later one replaces. |
 | `capabilities.graph.edges` | Concatenate. |
 | `capabilities.graph.definitions` | Merge by key. The later one replaces. |
