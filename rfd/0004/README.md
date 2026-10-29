@@ -1,6 +1,6 @@
 ---
 authors: K. S. Ernest (iFire) Lee <fire@users.noreply.github.com>
-state: published
+state: abandoned
 discussion:
 labels: planner, khr-interactivity, libriscv
 ---
@@ -48,3 +48,19 @@ Not yet implemented as of this RFD. Planned milestone order: (1) vendor
 non-state subset (`flow/sequence`/`branch`); (3) event model + suspend/resume;
 (4) remaining flow nodes, animation, interpolation; (5) sync-vs-async
 integration with `tw_planner.hpp`.
+
+## Abandoned, and the direction changed
+
+The decision above is not pursued (operator, 2026-10-29). The Tier 2 engine is
+still wanted, but it is to be built on top of the Lean planner rather than by
+embedding `libriscv` in the C++ NIF, which is a different design. The options and
+the milestone order above stay as the record of what was considered.
+
+Resume when the Lean planner can host a flow-graph execution model. The first
+step is to name the Lean-side entry point the flow nodes compile to; the Lean
+side of the planner is RFD66606-2304. That design belongs in its own RFD, not
+here.
+
+The tracker issue that carried this work is closed as superseded. Two paths
+above also went stale: `taskweft_nif` moved out of `V-Sekai-fire/nif` into the
+RECTGTN domain repository, and the ADRs were converted to RFDs.
