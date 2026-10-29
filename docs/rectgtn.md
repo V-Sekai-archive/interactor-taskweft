@@ -160,13 +160,40 @@ tries the next alternative otherwise (or reports no plan if none qualify).
 **Temporal duration** — any action may carry `"duration": "<ISO 8601>"` (e.g.
 `"PT5M"`); actions without one default to `"PT0S"`. Every `plan` response
 includes a `"temporal"` block computed from these durations, with no separate
-call needed:
+call needed.
+
+A plan is a temporal plan, and its steps are **scheduled, not merely listed**.
+Two steps conflict when one writes a state pointer the other writes or reads,
+or when their guards name the same ReBAC endpoint pair; a read against a read
+is not a conflict. Steps that do not conflict run side by side, so
+`temporal.total` is the makespan rather than the sum of the durations.
+
+`consistent` is false iff a step overlaps an earlier step it is not allowed to
+overlap — that is, iff the intervals the block reports violate one of those
+conflicts.
+
+Two calls of one parameterised action on two agents write `/loc/drone_1` and
+`/loc/drone_2`, so they run together and the plan costs one duration:
 
 ```json
-{"plan": [["a_fly", "drone_1", "city"]],
+{"plan": [["a_fly", "drone_1", "city"], ["a_fly", "drone_2", "city"]],
  "temporal": {"consistent": true, "origin": "PT0S", "total": "PT5M",
-              "steps": [{"action": "a_fly", "duration": "PT5M", "start": "PT0S", "end": "PT5M"}]}}
+              "steps": [{"action": "a_fly", "duration": "PT5M", "start": "PT0S", "end": "PT5M"},
+                        {"action": "a_fly", "duration": "PT5M", "start": "PT0S", "end": "PT5M"}]}}
 ```
+
+The same two calls on one agent both write `/loc/drone_1`, so the second waits
+for the first and the plan costs both:
+
+```json
+{"plan": [["a_fly", "drone_1", "city"], ["a_fly", "drone_1", "harbor"]],
+ "temporal": {"consistent": true, "origin": "PT0S", "total": "PT10M",
+              "steps": [{"action": "a_fly", "duration": "PT5M", "start": "PT0S", "end": "PT5M"},
+                        {"action": "a_fly", "duration": "PT5M", "start": "PT5M", "end": "PT10M"}]}}
+```
+
+`test/temporal_concurrency_test.exs` in `V-Sekai-fire/nif` measures both rows,
+and pairs every independent case with its contending twin.
 
 ## Soundness contract
 
