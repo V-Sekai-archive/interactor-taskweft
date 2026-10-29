@@ -48,3 +48,20 @@ Not yet implemented as of this RFD. Planned milestone order: (1) vendor
 non-state subset (`flow/sequence`/`branch`); (3) event model + suspend/resume;
 (4) remaining flow nodes, animation, interpolation; (5) sync-vs-async
 integration with `tw_planner.hpp`.
+
+## Parked, and the direction changed
+
+Parked (operator, 2026-10-29). The Tier 2 engine is still wanted, but not as
+this RFD decides it: it is to be built on top of the Lean planner rather than by
+embedding `libriscv` in the C++ NIF. The options and the milestone order above
+stay as the record of what was considered.
+
+Resume when the Lean planner can host a flow-graph execution model. The first
+step is to name the Lean-side entry point the flow nodes compile to; the Lean
+side of the planner is RFD66606-2304. This repository's state vocabulary has no
+value for a parked RFD, so `state` stays at `published` and the deferral is
+recorded here instead.
+
+The tracker issue that carried this work is closed as superseded. Two paths
+above also went stale: `taskweft_nif` moved out of `V-Sekai-fire/nif` into the
+RECTGTN domain repository, and the ADRs were converted to RFDs.
