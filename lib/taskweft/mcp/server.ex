@@ -58,10 +58,10 @@ defmodule Taskweft.MCP.Server do
       domain per pipeline. A problem is an ordinary overlay: pass the
       domain as `domain_dsl` and the problem here.
 
-      Later documents win. `variables` merge by name, `actions`,
-      `methods`, and `goal_methods` merge by key, and a non-empty
-      `todo_list` replaces the one before it. Every document must use
-      the format named by `format`.
+      Later documents win. `variables` merge by name, `actions` and
+      `methods` merge by key, and a non-empty `todo_list` replaces the
+      one before it. Every document must use the format named by
+      `format`.
       """
     )
 
@@ -122,10 +122,10 @@ defmodule Taskweft.MCP.Server do
       domain per pipeline. A problem is an ordinary overlay: pass the
       domain as `domain_dsl` and the problem here.
 
-      Later documents win. `variables` merge by name, `actions`,
-      `methods`, and `goal_methods` merge by key, and a non-empty
-      `todo_list` replaces the one before it. Every document must use
-      the format named by `format`.
+      Later documents win. `variables` merge by name, `actions` and
+      `methods` merge by key, and a non-empty `todo_list` replaces the
+      one before it. Every document must use the format named by
+      `format`.
       """
     )
 

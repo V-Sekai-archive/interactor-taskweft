@@ -29,7 +29,6 @@ defmodule Taskweft.Compose do
   | `variables` | Merge by `name`. The later one replaces. |
   | `actions` | Merge by key. The later one replaces. |
   | `methods` | Merge by key. The later one replaces. |
-  | `goal_methods` | Merge by key. The later one replaces. |
   | `enums` | Merge by key. The later one replaces. |
   | `capabilities.graph.edges` | Concatenate. |
   | `capabilities.graph.definitions` | Merge by key. The later one replaces. |
@@ -53,7 +52,7 @@ defmodule Taskweft.Compose do
 
   alias Taskweft.DSL
 
-  @merge_by_key ["methods", "actions", "goal_methods"]
+  @merge_by_key ["methods", "actions"]
 
   @type document :: map()
 
