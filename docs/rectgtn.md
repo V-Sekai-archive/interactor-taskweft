@@ -173,7 +173,15 @@ call needed:
 `Taskweft.replan/3` takes the plan **array**, not the envelope `Taskweft.plan/1`
 returns. Passing the envelope is accepted and answers `original_plan` of `[]`
 with `completed_steps` of `0`, so it reads as a complete replan without being
-one. Replanning a returned plan with `fail_step == -1` reports the whole plan
+one.
+
+The envelope carries `fail_step`, `completed_steps`, `original_plan`, `new_plan`
+and `recovered`. `Taskweft.NIF.plan/1` is the raw binding and answers the array
+alone; `Taskweft.plan/1` wraps that array with the `temporal` block.
+
+### `fail_step == -1` — the whole plan ran
+
+Replanning a returned plan with `fail_step == -1` reports the whole plan
 complete:
 
 ```elixir
@@ -185,9 +193,61 @@ env["fail_step"]       == -1
 env["completed_steps"] == length(plan)
 ```
 
-The envelope carries `fail_step`, `completed_steps`, `original_plan`, `new_plan`
-and `recovered`. `Taskweft.NIF.plan/1` is the raw binding and answers the array
-alone; `Taskweft.plan/1` wraps that array with the `temporal` block.
+Nothing is blacklisted, and `new_plan` is the plan that was passed in. A
+`fail_step` at or past the end of the plan is this case.
+
+### `fail_step >= 0` — the plan failed at that step
+
+`fail_step` is the 0-based index of the action that failed at runtime. The
+contract is **replay the prefix, blacklist the failed command, re-solve the
+original task list**. It is not a local repair of the failed subtask, and it is
+not a rollback of state mutations through pointer history.
+
+1. **Replay.** The first `fail_step` actions are re-applied, in order, to a
+   copy of the initial state, and `completed_steps` is `fail_step`. The state
+   is rebuilt from the domain and the plan array rather than restored from a
+   history, so a plan whose actions are not deterministic replays to whatever
+   those actions do now.
+2. **Blacklist.** The *command* at `fail_step` — that exact `(action, args)`
+   instantiation, not the action name — is blacklisted for the search, so the
+   planner cannot re-select it and must find another decomposition. A sibling
+   command of the same action stays available.
+3. **Re-solve.** The planner searches the **original task list** again, from
+   the replayed state. The answer is a whole plan from that state, so an
+   alternative that repeats the prefix repeats it in `new_plan`; `new_plan` is
+   not a suffix to splice onto the steps that already ran.
+4. **Refusal.** When no alternative decomposition exists, `new_plan` is `null`
+   and `recovered` is `false`, with `completed_steps` still `fail_step`.
+
+In the domain below both of `top`'s alternatives start with `do_a`, so a
+failure at step 0 has nothing else to try. `plan` is `[["do_a"],["do_b"]]`.
+
+```json
+{"@type": "domain:Definition", "name": "replan_example",
+ "variables": [{"name": "done", "type": "bool", "init": {"a": false, "b": false}}],
+ "actions": {"do_a": {"params": [], "body": [{"pointer/set": "/done/a", "value": true}]},
+             "do_b": {"params": [], "body": [{"pointer/set": "/done/b", "value": true}]},
+             "do_c": {"params": [], "body": [{"pointer/set": "/done/b", "value": true}]}},
+ "methods": {"top": {"params": [], "alternatives": [
+   {"name": "alt_ab", "subtasks": [["do_a"], ["do_b"]]},
+   {"name": "alt_ac", "subtasks": [["do_a"], ["do_c"]]}]}},
+ "todo_list": [["top"]]}
+```
+
+| `fail_step` | `completed_steps` | `recovered` | `new_plan` |
+|---|---|---|---|
+| `-1` | `2` | `true` | `[["do_a"],["do_b"]]` |
+| `0` | `0` | `false` | `null` |
+| `1` | `1` | `true` | `[["do_a"],["do_c"]]` |
+| `5` | `2` | `true` | `[["do_a"],["do_b"]]` |
+
+`test/taskweft/replan_contract_test.exs` runs every row of that table against
+the planner and fails on any difference, so the table is measured rather than
+asserted. It carries two further domains that discriminate the claims above:
+one whose second alternative applies only once the prefix has run, so a
+rollback to the initial state would refuse where the replay recovers, and one
+whose action is parameterised, so blacklisting the action name would refuse
+where blacklisting the command recovers.
 
 ## Composing several documents
 
