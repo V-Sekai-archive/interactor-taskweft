@@ -30,6 +30,10 @@ defmodule Taskweft.Compose do
   | `actions` | Merge by key. The later one replaces. |
   | `methods` | Merge by key. The later one replaces. |
   | `goal_methods` | Merge by key. The later one replaces. |
+  | `enums` | Merge by key. The later one replaces. |
+  | `capabilities.graph.edges` | Concatenate. |
+  | `capabilities.graph.definitions` | Merge by key. The later one replaces. |
+  | `capabilities.entities` | Merge by key. A shared entity unions its capability list. |
   | `todo_list` | A non-empty list replaces. An empty one keeps. |
   | everything else | The first document's value stands. |
 
@@ -151,7 +155,103 @@ defmodule Taskweft.Compose do
     base
     |> merge_variables(overlay)
     |> merge_keyed(overlay)
+    |> merge_enums(overlay)
+    |> merge_capabilities(overlay)
     |> merge_tasks(overlay)
+  end
+
+  # `enums` is a `key -> object` map. Merge by key; the later document replaces a
+  # shared key. Before this the whole key fell under "everything else: the first
+  # document's value stands", so an overlay could not introduce a domain enum.
+  defp merge_enums(base, overlay) do
+    case Map.get(overlay, "enums") do
+      value when is_map(value) ->
+        Map.put(base, "enums", Map.merge(Map.get(base, "enums", %{}), value))
+
+      _other ->
+        base
+    end
+  end
+
+  # `capabilities` is a dedicated top-level key (ADR 0004). An overlay must be able
+  # to add capability edges, entity memberships and relation definitions -- before
+  # this the whole key fell under "everything else: the first document stands", so
+  # a problem file passed as an overlay could not introduce problem-specific agent
+  # memberships or resource ownership edges at all (issue #9).
+  #
+  #   graph.edges       concatenate (union across overlays)
+  #   graph.definitions merge by key, the later one replaces
+  #   entities          merge by key, union each entity's capability list
+  defp merge_capabilities(base, overlay) do
+    case Map.get(overlay, "capabilities") do
+      value when is_map(value) ->
+        merged =
+          base
+          |> Map.get("capabilities", %{})
+          |> merge_capabilities_map(value)
+
+        Map.put(base, "capabilities", merged)
+
+      _other ->
+        base
+    end
+  end
+
+  defp merge_capabilities_map(base, overlay) do
+    base
+    |> merge_cap_entities(overlay)
+    |> merge_cap_graph(overlay)
+  end
+
+  defp merge_cap_entities(base, overlay) do
+    case Map.get(overlay, "entities") do
+      value when is_map(value) ->
+        union = fn _key, left, right -> Enum.uniq(List.wrap(left) ++ List.wrap(right)) end
+        Map.put(base, "entities", Map.merge(Map.get(base, "entities", %{}), value, union))
+
+      _other ->
+        base
+    end
+  end
+
+  defp merge_cap_graph(base, overlay) do
+    case Map.get(overlay, "graph") do
+      value when is_map(value) ->
+        Map.put(base, "graph", merge_rebac_graph(Map.get(base, "graph", %{}), value))
+
+      _other ->
+        base
+    end
+  end
+
+  defp merge_rebac_graph(base, overlay) do
+    base
+    |> merge_graph_edges(overlay)
+    |> merge_graph_definitions(overlay)
+  end
+
+  defp merge_graph_edges(base, overlay) do
+    case Map.get(overlay, "edges") do
+      edges when is_list(edges) ->
+        Map.put(base, "edges", List.wrap(Map.get(base, "edges", [])) ++ edges)
+
+      _other ->
+        base
+    end
+  end
+
+  defp merge_graph_definitions(base, overlay) do
+    case Map.get(overlay, "definitions") do
+      definitions when is_map(definitions) ->
+        Map.put(
+          base,
+          "definitions",
+          Map.merge(Map.get(base, "definitions", %{}), definitions)
+        )
+
+      _other ->
+        base
+    end
   end
 
   # A variable list is keyed by "name", and not by position. A merge

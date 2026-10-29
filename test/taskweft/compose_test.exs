@@ -219,4 +219,104 @@ defmodule Taskweft.ComposeTest do
       assert by_name["shared"]["init"] == %{"y" => false, "z" => true}
     end
   end
+
+  describe "compose/1 merges capabilities (issue #9)" do
+    test "graph edges concatenate across overlays" do
+      base =
+        domain("base", %{
+          "capabilities" => %{
+            "graph" => %{
+              "edges" => [%{"subject" => "alice", "rel" => "IS_MEMBER_OF", "object" => "team_x"}]
+            }
+          }
+        })
+
+      problem =
+        domain("problem", %{
+          "capabilities" => %{
+            "graph" => %{
+              "edges" => [%{"subject" => "team_x", "rel" => "OWNS", "object" => "resource_1"}]
+            }
+          }
+        })
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+      edges = merged["capabilities"]["graph"]["edges"]
+
+      assert length(edges) == 2
+      assert %{"subject" => "alice", "rel" => "IS_MEMBER_OF", "object" => "team_x"} in edges
+      assert %{"subject" => "team_x", "rel" => "OWNS", "object" => "resource_1"} in edges
+    end
+
+    test "graph definitions merge by key, and the later one wins a shared key" do
+      base =
+        domain("base", %{
+          "capabilities" => %{"graph" => %{"definitions" => %{"owner" => %{"base" => "OWNS"}}}}
+        })
+
+      problem =
+        domain("problem", %{
+          "capabilities" => %{
+            "graph" => %{
+              "definitions" => %{
+                "owner" => %{"union" => ["OWNS", "CONTROLS"]},
+                "admin" => %{"base" => "CONTROLS"}
+              }
+            }
+          }
+        })
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+      defs = merged["capabilities"]["graph"]["definitions"]
+
+      assert defs["owner"] == %{"union" => ["OWNS", "CONTROLS"]}
+      assert defs["admin"] == %{"base" => "CONTROLS"}
+    end
+
+    test "a shared entity unions its capability list, and a new entity is added" do
+      base = domain("base", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+
+      problem =
+        domain("problem", %{
+          "capabilities" => %{"entities" => %{"alice" => ["swim"], "bob" => ["fly"]}}
+        })
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+      entities = merged["capabilities"]["entities"]
+
+      assert Enum.sort(entities["alice"]) == ["fly", "swim"]
+      assert entities["bob"] == ["fly"]
+    end
+
+    test "a problem overlay introduces agent memberships the base did not have" do
+      # The exact case in issue #9: a problem file passed as an overlay could not
+      # add problem-specific agent memberships or resource ownership edges.
+      base = domain("base", %{"capabilities" => %{"graph" => %{"edges" => []}}})
+      problem = domain("problem", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+      assert merged["capabilities"]["entities"]["alice"] == ["fly"]
+    end
+
+    test "the base capabilities survive an overlay that declares none" do
+      base = domain("base", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+      problem = domain("problem", %{"todo_list" => [["a_one"]]})
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+      assert merged["capabilities"]["entities"]["alice"] == ["fly"]
+    end
+  end
+
+  describe "compose/1 merges enums (issue #9)" do
+    test "enums merge by key, and the later one wins a shared key" do
+      base = domain("base", %{"enums" => %{"mode" => %{"a" => 1}, "kept" => %{"x" => 1}}})
+      problem = domain("problem", %{"enums" => %{"mode" => %{"b" => 2}, "added" => %{"y" => 2}}})
+
+      assert {:ok, merged} = Compose.compose([base, problem])
+
+      assert merged["enums"]["mode"] == %{"b" => 2}
+      assert merged["enums"]["kept"] == %{"x" => 1}
+      assert merged["enums"]["added"] == %{"y" => 2}
+    end
+  end
 end
