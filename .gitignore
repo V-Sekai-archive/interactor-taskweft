@@ -24,6 +24,10 @@ cli/taskweft_riscv64
 lean/.lake/
 lean/lake-packages/
 
+# A Lean probe of the RECTGTN domain leaves its build residue here; the planner
+# now lives in interactor-rectgtn-domain-c-abi, not in this checkout.
+/rectgtn-domain-c-abi/
+
 # Erlang crash dumps
 erl_crash.dump
 
