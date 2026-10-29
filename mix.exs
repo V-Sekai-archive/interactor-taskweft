@@ -128,7 +128,16 @@ defmodule Taskweft.MixProject do
 
   defp deps do
     [
-      {:taskweft_nif, "~> 0.2.0-dev.20"},
+      # The planner now lives in the RECTGTN domain repository, beside the Lean
+      # model it implements. V-Sekai-fire/nif is archived and its Hex package
+      # stops at 0.2.0-dev.21. Pinned by SHA: a floating branch would let a
+      # change on the other side turn this repository's CI red with no diff.
+      # `override: true` because taskweft_rebac still declares a Hex requirement
+      # on taskweft_nif, and a git dependency cannot satisfy a Hex one otherwise.
+      {:taskweft_nif,
+       git: "https://github.com/V-Sekai-fire/interactor-rectgtn-domain-c-abi",
+       ref: "2c293aa02494964ee80f1de7d288b5ec1e91ace0",
+       override: true},
       {:taskweft_rebac, "~> 0.2.0-dev"},
       {:taskweft_mcp_client, "~> 0.2.0-dev"},
       {:ex_mcp, "~> 1.0.0-rc"},
