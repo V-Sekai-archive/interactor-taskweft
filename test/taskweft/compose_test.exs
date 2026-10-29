@@ -258,7 +258,10 @@ defmodule Taskweft.ComposeTest do
         domain("problem", %{
           "capabilities" => %{
             "graph" => %{
-              "definitions" => %{"owner" => %{"union" => ["OWNS", "CONTROLS"]}, "admin" => %{"base" => "CONTROLS"}}
+              "definitions" => %{
+                "owner" => %{"union" => ["OWNS", "CONTROLS"]},
+                "admin" => %{"base" => "CONTROLS"}
+              }
             }
           }
         })
