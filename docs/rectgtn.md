@@ -170,16 +170,24 @@ call needed:
 
 ## Soundness contract
 
-Replanning a returned plan with `fail_step == -1` reports the whole plan
+`Taskweft.replan/3` takes the plan **array**, not the envelope `Taskweft.plan/1`
+returns. Passing the envelope is accepted and answers `original_plan` of `[]`
+with `completed_steps` of `0`, so it reads as a complete replan without being
+one. Replanning a returned plan with `fail_step == -1` reports the whole plan
 complete:
 
 ```elixir
-{:ok, plan_json} = Taskweft.plan(domain_json)
-{:ok, out}       = Taskweft.replan(domain_json, plan_json, -1)
+{:ok, plan_json} = Taskweft.plan(domain_json)   # {"plan": [...], "temporal": {...}}
+plan = Jason.decode!(plan_json)["plan"]
+{:ok, out} = Taskweft.replan(domain_json, Jason.encode!(plan), -1)
 env = Jason.decode!(out)
 env["fail_step"]       == -1
-env["completed_steps"] == length(Jason.decode!(plan_json))
+env["completed_steps"] == length(plan)
 ```
+
+The envelope carries `fail_step`, `completed_steps`, `original_plan`, `new_plan`
+and `recovered`. `Taskweft.NIF.plan/1` is the raw binding and answers the array
+alone; `Taskweft.plan/1` wraps that array with the `temporal` block.
 
 ## Composing several documents
 
