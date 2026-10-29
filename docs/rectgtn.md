@@ -338,7 +338,10 @@ documents to compose over `domain_dsl`:
 
 ## See also
 
-- [ADR 0001](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/docs/adr/0001-gltf-interactivity-node-shape.md) — the action-body node shape (`eval` + `pointer/set`).
-- [ADR 0002](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/docs/adr/0002-khr-interactivity-tier1-node-conventions.md) — the glTF Interactivity node catalog conventions.
-- [ADR 0003](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/docs/adr/0003-khr-interactivity-tier2-execution-strategy.md) — the planned flow-graph execution engine.
-- [ADR 0004](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/docs/adr/0004-unify-domain-capabilities-with-rebac-graph.md) — unifying domain capabilities with the ReBAC relation-expression engine (issue #96).
+The ADRs this list used to cite were converted to Oxide-style RFDs; each entry
+below points at the RFD that replaced it.
+
+- [RFD66606-0002](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/rfd/0002/README.md) — aligning the planner stack on the glTF Interactivity node shape; the action-body node shape (`eval` + `pointer/set`).
+- [RFD66606-0003](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/rfd/0003/README.md) — the glTF Interactivity Tier 1 node catalog conventions.
+- [RFD66606-0004](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/rfd/0004/README.md) — the Tier 2 flow-graph execution strategy.
+- [RFD66606-0005](https://github.com/V-Sekai-fire/interactor-taskweft/blob/main/rfd/0005/README.md) — unifying domain capabilities with the ReBAC relation-expression engine (issue #96).
