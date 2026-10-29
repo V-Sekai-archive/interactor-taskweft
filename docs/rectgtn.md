@@ -165,14 +165,33 @@ includes a `"temporal"` block computed from these durations, with no separate
 call needed.
 
 A plan is a temporal plan, and its steps are **scheduled, not merely listed**.
-Two steps conflict when one writes a state pointer the other writes or reads,
-or when their guards name the same ReBAC endpoint pair; a read against a read
-is not a conflict. Steps that do not conflict run side by side, so
+Each step is a transaction over the plan's state, and the schedule is what
+FoundationDB calls **strict serializability**: the intervals the block reports
+"could have been produced by executing transactions one at a time, even though
+they may actually have been executed concurrently"
+([Conflict ranges](https://apple.github.io/foundationdb/developer-guide.html#conflict-ranges)).
+
+A step's **conflict ranges** come from its body. Its write conflict range is the
+state pointers it writes; its read conflict range is the ones it reads. Two steps
+conflict when one writes a pointer the other writes or reads — FoundationDB
+states the same test as "the first to commit writes a value that the second
+reads". A step that writes nothing takes no write conflict range, and read-only
+transactions "never conflict", so a read against a read is not a conflict.
+
+The engine also adds a conflict range for each ReBAC endpoint pair a step's
+guards name, so two steps that use the same capability do not overlap.
+FoundationDB offers exactly this lever — "conflicts can be *created*, increasing
+isolation, by explicitly adding read or write conflict ranges" — and reaches for
+it for the same reason in its own guarded-increment example. A step holds the
+capability it checks for its whole duration, so the pair is added as a write
+conflict range.
+
+Steps whose conflict ranges do not intersect run side by side, so
 `temporal.total` is the makespan rather than the sum of the durations.
 
-`consistent` is false iff a step overlaps an earlier step it is not allowed to
-overlap — that is, iff the intervals the block reports violate one of those
-conflicts.
+`consistent` is false iff the reported intervals cannot be ordered so that every
+conflicting pair is in conflict-range order — that is, iff a step overlaps an
+earlier step it is not allowed to overlap.
 
 Two calls of one parameterised action on two agents write `/loc/drone_1` and
 `/loc/drone_2`, so they run together and the plan costs one duration:
@@ -194,8 +213,9 @@ for the first and the plan costs both:
                         {"action": "a_fly", "duration": "PT5M", "start": "PT5M", "end": "PT10M"}]}}
 ```
 
-`test/temporal_concurrency_test.exs` in `V-Sekai-fire/nif` measures both rows,
-and pairs every independent case with its contending twin.
+`test/temporal_concurrency_test.exs` in
+`V-Sekai-fire/interactor-rectgtn-domain-c-abi` measures both rows, and pairs
+every independent case with its contending twin.
 
 ## Soundness contract
 
