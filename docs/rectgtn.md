@@ -93,8 +93,13 @@ field order matches the canonical Lean model's `⟨subject, RelationType,
 object⟩` tuple (`Planner.Capabilities`); JSON keys are looked up by name, not
 position, so this is purely for readability/consistency, not a wire format
 requirement.
-Relations are `HAS_CAPABILITY`, `CONTROLS`, `OWNS`, `IS_MEMBER_OF`,
-`DELEGATED_TO`, `SUPERVISOR_OF`, `PARTNER_OF`, `CAN_ENTER`, `CAN_INSTANCE`.
+Relations are the core model's eight, the closed `RelationType` enum in
+`Planner/Types.lean`: `OWNS`, `CONTROLS`, `DELEGATED_TO`, `HAS_CAPABILITY`,
+`IS_MEMBER_OF`, `SUPERVISOR_OF`, `PARTNER_OF`, `IS_A`. A domain verb is not one
+of them: the runtime takes any relation string, so a domain that needs
+`CAN_ENTER` or `CAN_INSTANCE` writes it in its own graph's edges and guards
+(RFD66606-2204's fleet domain is the worked case) and the core enum stays
+closed.
 
 ```elixir
 graph =
