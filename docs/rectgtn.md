@@ -196,6 +196,10 @@ Later documents win, so the fold order carries meaning:
 | `actions` | Merge by key. The later one replaces. |
 | `methods` | Merge by key. The later one replaces. |
 | `goal_methods` | Merge by key. The later one replaces. |
+| `enums` | Merge by key. The later one replaces. |
+| `capabilities.graph.edges` | Concatenate. |
+| `capabilities.graph.definitions` | Merge by key. The later one replaces. |
+| `capabilities.entities` | Merge by key. A shared entity unions its capability list. |
 | `todo_list` | A non-empty list replaces. An empty one keeps. |
 | everything else | The first document's value stands. |
 
