@@ -273,37 +273,52 @@ defmodule Taskweft.ComposeTest do
       assert defs["admin"] == %{"base" => "CONTROLS"}
     end
 
-    test "a shared entity unions its capability list, and a new entity is added" do
-      base = domain("base", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
-
-      problem =
-        domain("problem", %{
-          "capabilities" => %{"entities" => %{"alice" => ["swim"], "bob" => ["fly"]}}
-        })
-
-      assert {:ok, merged} = Compose.compose([base, problem])
-      entities = merged["capabilities"]["entities"]
-
-      assert Enum.sort(entities["alice"]) == ["fly", "swim"]
-      assert entities["bob"] == ["fly"]
-    end
-
-    test "a problem overlay introduces agent memberships the base did not have" do
+    # `graph.edges` is the single canonical representation (issue #5), so the
+    # overlay case is a HAS_CAPABILITY edge like any other relation.
+    test "a problem overlay adds capability edges the base did not have" do
       # The exact case in issue #9: a problem file passed as an overlay could not
       # add problem-specific agent memberships or resource ownership edges.
       base = domain("base", %{"capabilities" => %{"graph" => %{"edges" => []}}})
-      problem = domain("problem", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+
+      problem =
+        domain("problem", %{
+          "capabilities" => %{
+            "graph" => %{
+              "edges" => [
+                %{"subject" => "alice", "rel" => "HAS_CAPABILITY", "object" => "fly"}
+              ]
+            }
+          }
+        })
 
       assert {:ok, merged} = Compose.compose([base, problem])
-      assert merged["capabilities"]["entities"]["alice"] == ["fly"]
+      edges = merged["capabilities"]["graph"]["edges"]
+
+      assert edges == [%{"subject" => "alice", "rel" => "HAS_CAPABILITY", "object" => "fly"}]
     end
 
     test "the base capabilities survive an overlay that declares none" do
-      base = domain("base", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+      base =
+        domain("base", %{
+          "capabilities" => %{
+            "graph" => %{
+              "edges" => [%{"subject" => "alice", "rel" => "HAS_CAPABILITY", "object" => "fly"}]
+            }
+          }
+        })
+
       problem = domain("problem", %{"todo_list" => [["a_one"]]})
 
       assert {:ok, merged} = Compose.compose([base, problem])
-      assert merged["capabilities"]["entities"]["alice"] == ["fly"]
+      assert length(merged["capabilities"]["graph"]["edges"]) == 1
+    end
+
+    test "the entities sugar is not a merge target" do
+      base = domain("base", %{"capabilities" => %{"entities" => %{"alice" => ["fly"]}}})
+
+      assert {:ok, merged} = Compose.compose([base, base])
+      assert merged["capabilities"]["entities"] == %{"alice" => ["fly"]}
+      refute Map.has_key?(merged["capabilities"], "graph")
     end
   end
 

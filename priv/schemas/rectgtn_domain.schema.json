@@ -46,15 +46,9 @@
     },
     "capabilities": {
       "type": "object",
-      "description": "ReBAC capability/relationship data (ADR 0004) — a dedicated top-level key, matching glTF Interactivity's own convention that structured/relational extension data (e.g. KHR_lights_punctual's \"/extensions/KHR_lights_punctual/lights\") gets its own namespaced slot rather than sharing the generic scalar/vector \"variables\" array. An action requirement is not sugar here: write the {\"eval\": {\"type\": \"rebac/check\", ...}} guard step directly into the action's own body.",
+      "additionalProperties": false,
+      "description": "ReBAC capability/relationship data (ADR 0004) — a dedicated top-level key, matching glTF Interactivity's own convention that structured/relational extension data (e.g. KHR_lights_punctual's \"/extensions/KHR_lights_punctual/lights\") gets its own namespaced slot rather than sharing the generic scalar/vector \"variables\" array. `graph` is the single canonical representation: an entity holding a capability is one HAS_CAPABILITY edge in `graph.edges`, written out like every other relation. There is no `entities` sugar, and no compiled sugar for action requirements either: write the {\"eval\": {\"type\": \"rebac/check\", ...}} guard step directly into the action's own body.",
       "properties": {
-        "entities": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
-        },
         "graph": { "$ref": "#/$defs/rebac_graph" }
       }
     }
