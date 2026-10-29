@@ -119,25 +119,27 @@ chain, e.g. membership, before checking the inner expression).
 
 A `TwCall`, `TwGoal`, or `TwMultiGoal` domain may add either or both.
 
-**Capabilities** — a top-level `capabilities` object binds which entities hold
-which capabilities, and (optionally) an explicit relationship graph. This is
-a dedicated top-level key, not a variable: structured/relational data gets
-its own namespaced slot, matching glTF Interactivity's own convention for
-extension data that isn't a scalar/vector value socket (e.g.
-`KHR_lights_punctual`'s `/extensions/KHR_lights_punctual/lights`).
+**Capabilities** — a top-level `capabilities` object carries the domain's
+relationship graph. This is a dedicated top-level key, not a variable:
+structured/relational data gets its own namespaced slot, matching glTF
+Interactivity's own convention for extension data that isn't a scalar/vector
+value socket (e.g. `KHR_lights_punctual`'s
+`/extensions/KHR_lights_punctual/lights`).
 
 ```json
 "capabilities": {
-  "entities": {"<entity>": ["<cap>", ...], ...},
-  "graph":     {"edges": [...], "definitions": {}}
+  "graph": {"edges": [{"subject": "<entity>", "rel": "HAS_CAPABILITY", "object": "<cap>"}, ...],
+            "definitions": {}}
 }
 ```
 
-`entities` compiles to direct `HAS_CAPABILITY` edges. There is no compiled
-sugar for action requirements: write the guard directly into the action's
-own body as an ordinary `{"eval": {"type": "rebac/check", "rel": <relation>,
-"subject": <ref>, "object": <cap>}}` step — the same mechanism every other
-action precondition already uses. An agent qualifies if it's a *member of a
+`graph.edges` is the **single canonical representation**: an entity holding a
+capability is one `HAS_CAPABILITY` edge, written out like every other relation.
+There is no `entities` sugar, and there is no compiled sugar for action
+requirements either — write the guard directly into the action's own body as an
+ordinary `{"eval": {"type": "rebac/check", "rel": <relation>, "subject": <ref>,
+"object": <cap>}}` step, the same mechanism every other action precondition
+already uses. An agent qualifies if it's a *member of a
 team* that holds the capability, not just a direct holder, by expressing
 `rel` as a relation expression rather than a bare name:
 
@@ -212,7 +214,6 @@ Later documents win, so the fold order carries meaning:
 | `enums` | Merge by key. The later one replaces. |
 | `capabilities.graph.edges` | Concatenate. |
 | `capabilities.graph.definitions` | Merge by key. The later one replaces. |
-| `capabilities.entities` | Merge by key. A shared entity unions its capability list. |
 | `todo_list` | A non-empty list replaces. An empty one keeps. |
 | everything else | The first document's value stands. |
 

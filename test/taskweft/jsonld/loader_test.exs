@@ -115,7 +115,18 @@ defmodule Taskweft.JSONLD.LoaderTest do
     # validated shape: it's a hand-written {"eval": {"type": "rebac/check",
     # ...}} step, covered by the ordinary body_step schema.
     test "accepts a well-formed capabilities object" do
-      doc = base(%{"capabilities" => %{"entities" => %{"drone_1" => ["fly"]}}})
+      doc =
+        base(%{
+          "capabilities" => %{
+            "graph" => %{
+              "edges" => [
+                %{"subject" => "drone_1", "rel" => "HAS_CAPABILITY", "object" => "fly"}
+              ],
+              "definitions" => %{}
+            }
+          }
+        })
+
       assert :ok = Loader.validate(doc, %{})
     end
 
@@ -123,7 +134,7 @@ defmodule Taskweft.JSONLD.LoaderTest do
       assert :ok = Loader.validate(base(%{}), %{})
     end
 
-    test "accepts entities being omitted" do
+    test "accepts capabilities carrying no graph" do
       assert :ok = Loader.validate(base(%{"capabilities" => %{}}), %{})
     end
 
@@ -133,16 +144,19 @@ defmodule Taskweft.JSONLD.LoaderTest do
       assert msg =~ "#/capabilities"
     end
 
-    test "rejects a non-object entities group" do
-      doc = base(%{"capabilities" => %{"entities" => ["fly"]}})
+    # `graph.edges` is the single canonical representation (issue #5): an
+    # entity holding a capability is one HAS_CAPABILITY edge, and the flat
+    # `entities` sugar that used to compile into those edges is gone.
+    test "rejects the entities sugar" do
+      doc = base(%{"capabilities" => %{"entities" => %{"drone_1" => ["fly"]}}})
       assert {:error, msg} = Loader.validate(doc, %{})
       assert msg =~ "#/capabilities/entities"
     end
 
-    test "rejects a capability list containing a non-string" do
-      doc = base(%{"capabilities" => %{"entities" => %{"drone_1" => [1]}}})
+    test "rejects an unknown key under capabilities" do
+      doc = base(%{"capabilities" => %{"graphs" => %{}}})
       assert {:error, msg} = Loader.validate(doc, %{})
-      assert msg =~ "#/capabilities/entities/drone_1"
+      assert msg =~ "#/capabilities/graphs"
     end
 
     test "accepts an explicit ReBAC graph" do

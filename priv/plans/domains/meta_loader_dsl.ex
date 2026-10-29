@@ -85,8 +85,9 @@ defmodule MetaLoader do
 
   @actions %{{
     register_capabilities: %{
-      # Wire entity capabilities into IPyHOP's built-in filtering system.
-      params: [:entity_caps, :action_caps],
+      # Register the domain's ReBAC relationship graph (ADR 0004) — the single
+      # canonical representation of capabilities.
+      params: [:graph],
     },
   }
 

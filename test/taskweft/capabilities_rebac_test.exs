@@ -34,11 +34,23 @@ defmodule Taskweft.CapabilitiesReBACTest do
     }
   end
 
-  describe "backward compatibility: flat entities shape" do
+  defp cap_graph(entity, caps) do
+    %{
+      "graph" => %{
+        "edges" =>
+          Enum.map(caps, fn cap ->
+            %{"subject" => entity, "rel" => "HAS_CAPABILITY", "object" => cap}
+          end),
+        "definitions" => %{}
+      }
+    }
+  end
+
+  describe "a direct HAS_CAPABILITY edge" do
     defp flat_domain(entity_caps) do
       domain(%{
         "variables" => [%{"name" => "done", "init" => %{"a" => false}}],
-        "capabilities" => %{"entities" => %{"drone_1" => entity_caps}},
+        "capabilities" => cap_graph("drone_1", entity_caps),
         "actions" => %{
           "a_fly" => %{
             "params" => ["agent"],
@@ -108,7 +120,7 @@ defmodule Taskweft.CapabilitiesReBACTest do
     defp union_domain(caps) do
       domain(%{
         "variables" => [%{"name" => "done", "init" => %{"a" => false}}],
-        "capabilities" => %{"entities" => %{"drone_1" => caps}},
+        "capabilities" => cap_graph("drone_1", caps),
         "actions" => %{
           "a_fly" => %{
             "params" => ["agent"],
@@ -153,7 +165,7 @@ defmodule Taskweft.CapabilitiesReBACTest do
           %{"name" => "done", "init" => %{"a" => false}},
           %{"name" => "ready", "init" => %{"drone_1" => ready?}}
         ],
-        "capabilities" => %{"entities" => %{"drone_1" => caps}},
+        "capabilities" => cap_graph("drone_1", caps),
         "actions" => %{
           "a_fly" => %{
             "params" => ["agent"],

@@ -161,10 +161,9 @@
       "body": []
     },
     "register_capabilities": {
-      "description": "Wire entity capabilities into IPyHOP's built-in filtering system.",
+      "description": "Register the domain's ReBAC relationship graph (ADR 0004) — the single canonical representation of capabilities.",
       "params": [
-        "entity_caps",
-        "action_caps"
+        "graph"
       ],
       "body": []
     },
@@ -213,8 +212,7 @@
             ],
             [
               "register_capabilities",
-              "{capabilities.entities}",
-              "{capabilities.actions}"
+              "{capabilities.graph}"
             ]
           ]
         }

@@ -61,8 +61,8 @@ defmodule Taskweft.DSL.SafeParser do
   defp handle_attribute({:todo_list, _, [value]}, domain),
     do: Map.put(domain, "todo_list", todo_to_list(value))
 
-  # RECTGTN's Relationship-Enabled Capability layer: entities + a ReBAC graph,
-  # serialised structurally so a domain carries it without a JSON-LD copy.
+  # RECTGTN's Relationship-Enabled Capability layer: a ReBAC graph, serialised
+  # structurally so a domain carries it without a JSON-LD copy.
   defp handle_attribute({:capabilities, _, [value]}, domain),
     do: Map.put(domain, "capabilities", ast_literal(value))
 

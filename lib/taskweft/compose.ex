@@ -33,7 +33,6 @@ defmodule Taskweft.Compose do
   | `enums` | Merge by key. The later one replaces. |
   | `capabilities.graph.edges` | Concatenate. |
   | `capabilities.graph.definitions` | Merge by key. The later one replaces. |
-  | `capabilities.entities` | Merge by key. A shared entity unions its capability list. |
   | `todo_list` | A non-empty list replaces. An empty one keeps. |
   | everything else | The first document's value stands. |
 
@@ -174,14 +173,16 @@ defmodule Taskweft.Compose do
   end
 
   # `capabilities` is a dedicated top-level key (ADR 0004). An overlay must be able
-  # to add capability edges, entity memberships and relation definitions -- before
-  # this the whole key fell under "everything else: the first document stands", so
-  # a problem file passed as an overlay could not introduce problem-specific agent
-  # memberships or resource ownership edges at all (issue #9).
+  # to add capability edges and relation definitions -- before this the whole key
+  # fell under "everything else: the first document stands", so a problem file
+  # passed as an overlay could not introduce problem-specific agent memberships or
+  # resource ownership edges at all (issue #9).
   #
   #   graph.edges       concatenate (union across overlays)
   #   graph.definitions merge by key, the later one replaces
-  #   entities          merge by key, union each entity's capability list
+  #
+  # `graph.edges` is the single canonical representation (issue #5): an entity
+  # holding a capability is one HAS_CAPABILITY edge, not an `entities` entry.
   defp merge_capabilities(base, overlay) do
     case Map.get(overlay, "capabilities") do
       value when is_map(value) ->
@@ -198,20 +199,7 @@ defmodule Taskweft.Compose do
   end
 
   defp merge_capabilities_map(base, overlay) do
-    base
-    |> merge_cap_entities(overlay)
-    |> merge_cap_graph(overlay)
-  end
-
-  defp merge_cap_entities(base, overlay) do
-    case Map.get(overlay, "entities") do
-      value when is_map(value) ->
-        union = fn _key, left, right -> Enum.uniq(List.wrap(left) ++ List.wrap(right)) end
-        Map.put(base, "entities", Map.merge(Map.get(base, "entities", %{}), value, union))
-
-      _other ->
-        base
-    end
+    merge_cap_graph(base, overlay)
   end
 
   defp merge_cap_graph(base, overlay) do
